@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link  rel="stylesheet" type="text/css" href="yep.css">
+</head>
+    <body>
+        <div id='getemployee'>
+            <button id="action">Step 1:Fetch Data</button>
+            <button id="get">Step 2: Display Data</button>
+            <button id="update">Play</button>
+        </div>
+         <form id="content">
+            <div id="outset">
+                <table id="showData"></table>
+            </div>
+        </form>
+        <div id="outer"><br/>
+            <div id="p1">Player 1
+                <div id="P1Name"></div>
+                <div id="player1">0</div>
+            </div>
+            <div  id="p2">
+                Player 2
+                <div id="P2Name"></div>
+                <div id="player2">0</div>
+            </div>
+            <table id="game"></table>
+        </div>
+    </body>
+</html>
+
+<script type="text/javascript"
+        src="http://code.jquery.com/jquery-3.3.1.js"
+        integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+        crossorigin="anonymous">
+</script>
+
+<script type="text/javascript">
+    document.getElementById('action').addEventListener('click',Get, true);
+    document.getElementById('get').addEventListener('click',Table, true);
+    document.getElementById('update').addEventListener('click',update, true);
+    var winners = new Array();
+    var player1Selections = new Array();
+    var player2Selections = new Array();
+    var timer;
+    var currentPlayer = 0;
+    var move = 0;
+    var points1 = 0;
+    var points2 = 0;
+      
+    function drawBoard() {
+        var Parent = document.getElementById("game");
+        var counter = 1;
+        while (Parent.hasChildNodes()) {
+            Parent.removeChild(Parent.firstChild);
+        }
+        for (s = 0; s < 3; s++) {
+            var row = document.createElement("tr");
+            for (r = 0; r < 3; r++) {
+                var col = document.createElement("td");
+                col.id = counter;
+                col.innerHTML = counter;
+                var handler = function(e) {
+                    if (currentPlayer == 0) {
+                        this.innerHTML = "X";
+                        player1Selections.push(parseInt(this.id));
+                        player1Selections.sort(function(a, b) { return a - b });
+                    }
+                    else {
+                        this.innerHTML = "O";
+                        player2Selections.push(parseInt(this.id));
+                        player2Selections.sort(function(a, b) { return a - b });
+                    }
+                    move++;
+                    var isWin = checkWinner();
+                    if (isWin)
+                    {
+                        if(currentPlayer == 0){
+                            points1+=10;
+                            points2-=5;
+                        }
+                        else {
+                            points2+=10;
+                            points1-=5;
+                        }
+                        document.getElementById("player1").innerHTML = points1;
+                        document.getElementById("player2").innerHTML = points2;
+                        reset();
+                        drawBoard();
+                    }
+                    else
+                    {
+                        if (currentPlayer == 0)
+                            currentPlayer = 1;
+                        else
+                            currentPlayer = 0;
+                        this.removeEventListener('click', arguments.callee);
+                    }
+                };
+                col.addEventListener('click', handler);
+                row.appendChild(col);
+                counter++;
+            }
+            Parent.appendChild(row);
+        }
+        loadAnswers();
+    }
+    
+    function reset()
+    {
+        currentPlayer = 0;
+        player1Selections = new Array();
+        player2Selections = new Array();
+    }
+    
+    function loadAnswers()
+    {
+        winners.push([1, 2, 3]);
+        winners.push([4, 5, 6]);
+        winners.push([7, 8, 9]);
+        winners.push([1, 4, 7]);
+        winners.push([2, 5, 8]);
+        winners.push([3, 6, 9]);
+        winners.push([1, 5, 9]);
+        winners.push([3, 5, 7]);
+    }
+    
+    function checkWinner() 
+    {
+        var win = false;
+        var playerSelections = new Array();
+        if (currentPlayer == 0)
+            playerSelections = player1Selections;
+        else
+        playerSelections = player2Selections;
+        if (playerSelections.length >= 3) {
+            for (i = 0; i < winners.length; i++) {
+                var sets = winners[i];
+                var setFound = true;
+                for (r = 0; r < sets.length; r++) {
+                    var found = false;
+                    for (s = 0; s < playerSelections.length; s++) {
+                        if (sets[r] == playerSelections[s]) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found == false) {
+                        setFound = false;
+                        break;
+                    }
+                }
+                if (setFound == true) {
+                    win = true;
+                    break;
+                }
+            }
+        }
+        return win;
+    }
+    var Player=[];
+    
+    function Get(){
+            $.ajax({
+                url: 'http://localhost:57308/api/Records',
+                type: 'GET',
+                dataType: 'json',
+                success: function(res){
+                console.log(res);   
+                Player= res;
+                },
+                error: function(e) {
+                    console.log(e);
+                }
+            });
+        }
+    
+    function Table(){
+            var col = [];
+            for (var i = 0; i < Player.length; i++) {
+                for (var key in Player[i]) {
+                    if (col.indexOf(key) === -1)
+                        col.push(key);   
+                        }
+                    }
+            var table = document.createElement("table");
+            var tr = table.insertRow(-1);   
+            for (var i = 0; i < col.length; i++) {
+                var th = document.createElement("th");
+                th.innerHTML = col[i];
+                tr.appendChild(th);
+            }
+            for (var i = 0; i < Player.length; i++) {
+                tr = table.insertRow(-1);
+                for (var j = 0; j < col.length; j++) {
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = Player[i][col[j]];
+                        }
+                    }
+            var divContainer = document.getElementById("showData");
+            divContainer.innerHTML = "";
+            divContainer.appendChild(table);
+            }
+    function update(){
+        drawBoard();
+        var p1=prompt("What is player 1 id?");
+        var p2=prompt("What is player 2 id?");
+        var Id1 = document.getElementById("p1").value;
+        var Id2 = document.getElementById("p2").value;
+        var dataToSend1= {
+                 "Id": p1, 
+                 "Player":name,
+                 "Score":points1
+        }
+        Url='http://localhost:57308/api/Records';
+        Url1=Url+p1;
+        $.ajax({
+            url:Url1,
+            type: 'PUT',
+            dataType: 'json',
+            data: dataToSend1,
+            success: function(data){
+                alert("Score of Player 1 Updated");
+                }
+          });
+        var dataToSend2= {
+            "Id": p2, 
+            "Player":name,
+            "Score":points2
+        }
+        Url='http://localhost:57308/api/Records';
+        Url2=Url+p2;
+        $.ajax({
+            url:Url2,
+            type: 'PUT',
+            dataType: 'json',
+            data: dataToSend2,
+            success: function(data){
+                alert("Score of Player 2 Updated");
+            }
+        });
+    }
+</script>

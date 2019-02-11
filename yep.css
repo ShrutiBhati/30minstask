@@ -1,0 +1,56 @@
+<style>
+td,tr
+{
+    width:50px;
+    height:50px;
+    border: solid 1px black;
+    text-align:center;
+    font-size:20pt;
+}
+
+td:hover, tr:hover, table:hover
+{
+    background-color: #dbdbdb;
+    cursor:pointer;
+}
+
+#getemployee{
+    position: relative;
+    top: 10px;
+    left: 15%;
+}
+
+#showData {
+    background-color: azure;
+    position: relative;
+    left: 40%;
+    top:20px;  
+}
+
+#action , #get , #update{
+    background-color: paleturquoise;
+	color: black;
+  	padding: 18px;
+  	margin: 16px 0;
+  	border: bold;
+	cursor: pointer;
+    width: 20%;
+}
+
+#outer
+{
+    margin:0 auto;
+    width:50%;
+    padding-top:50px;
+}
+
+#game {
+    text-align:center;
+    font-size: 40px;
+    background-color: aquamarine;
+}
+
+#p1,#p2 {
+    font-size: 20px;
+}
+</style>
